@@ -1,5 +1,9 @@
 # Documentation
 
+## Team Members
+- Amna Khushbakht (akhushba)
+- Kiran Mandhane (kmandhan)
+
 ## Software Requirements
 
 1. Python 3.10
