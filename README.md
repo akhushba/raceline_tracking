@@ -1,8 +1,9 @@
-# Documentation
+# Team Members
 
-## Team Members
 - Amna Khushbakht (akhushba)
 - Kiran Mandhane (kmandhan)
+
+# Documentation
 
 ## Software Requirements
 
@@ -14,6 +15,12 @@
 
 ```bash
 python3 main.py ./racetracks/Montreal.csv ./racetracks/Montreal_raceline.csv
+```
+
+OR use our script
+
+```bash
+./run_track.sh Montreal
 ```
 
 ## To design controller
