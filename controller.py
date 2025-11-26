@@ -291,7 +291,7 @@ def controller(
     left_distances  = np.linalg.norm(racetrack.left_boundary  - car_position, axis=1)
     min_boundary_dist = min(np.min(right_distances), np.min(left_distances))
 
-    safety_threshold = 8.0 if not is_straight else 5.5
+    safety_threshold = 8.0 if not is_straight else 4.0
     if min_boundary_dist < safety_threshold:
         safety_factor = (min_boundary_dist / safety_threshold) ** 1.5
         target_velocity *= np.clip(safety_factor, 0.2, 1.0)
