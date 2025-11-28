@@ -3,12 +3,10 @@ from numpy.typing import ArrayLike
 from racetrack import RaceTrack
 
 class PIDController:
-    """Simple PID controller."""
-    def __init__(self, Kp, Ki, Kd, windup_limit=10.0):
+    def __init__(self, Kp, Ki, Kd):
         self.Kp = Kp
         self.Ki = Ki
         self.Kd = Kd
-        self.windup_limit = windup_limit
         self.integral = 0.0
         self.prev_error = None
         
@@ -18,7 +16,6 @@ class PIDController:
         
         # Integral
         self.integral += error * dt
-        self.integral = np.clip(self.integral, -self.windup_limit, self.windup_limit)
         I = self.Ki * self.integral
         
         # Derivative
@@ -183,11 +180,6 @@ def controller(
     v_min = float(parameters[2])
     v_straight = max_velocity
 
-    # --- Step 3: near start/finish detection ---
-
-    dist_to_start = np.linalg.norm(car_position - centerline[0])
-    near_start_finish = dist_to_start < 20.0
-
     # --- Step 4: smooth straightness measure ---
     inst_straight = 1.0 if is_straight else 0.0
     alpha_eff = 0.05 if inst_straight == 1.0 else 0.20
@@ -204,10 +196,6 @@ def controller(
     curve_gain = 0.15
     straight_gain = 0.25
     velocity_gain = (1 - smooth_straightness) * curve_gain + smooth_straightness * straight_gain
-
-    if near_start_finish:
-        base_lookahead = 10.0
-        velocity_gain = 0.15
     lookahead_distance = base_lookahead + velocity_gain * abs(current_velocity)
 
     # --- Step 5: lookahead point for steering (r[i+1]) ---
@@ -255,7 +243,7 @@ def controller(
     speed_curvature = max(speed_curvature, 0.0)
 
    # ------------------------------------
-    # TIGHT TURN STATE MACHINE
+    # TIGHT TURN STATE MACHINE //code's written by us, but communicated with Claude to find solutions on how to solve hairpin turns
     # ------------------------------------
     tight_turn_enter = 0.02      # enter hairpin mode
     tight_turn_exit  = 0.012      # require very low curvature to exit
@@ -286,7 +274,6 @@ def controller(
     target_velocity = base_speed
 
     # --- Step 8: boundary-based safety on speed ---
-
     right_distances = np.linalg.norm(racetrack.right_boundary - car_position, axis=1)
     left_distances  = np.linalg.norm(racetrack.left_boundary  - car_position, axis=1)
     min_boundary_dist = min(np.min(right_distances), np.min(left_distances))
@@ -315,7 +302,6 @@ def controller(
     # Prevents early acceleration
     # ---------------------------------------------
 
-    # print("tight ", tight_turn_hold)
     if tight_turn_hold > 0:
         desired_velocity = min(12.5, current_velocity, target_velocity)
     else:
